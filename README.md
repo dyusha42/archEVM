@@ -1,13 +1,5 @@
 # archEVM
 
-sudo apt install build-essential gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf gcc-aarch64-linux-gnu g++-aarch64-linux-gnu qemu-user qemu-user-static
-
-chmod +x test.sh
-
-make test
-
-make run
-
-make arm32
-
-qemu-arm -L /usr/arm-linux-gnueabihf ./neon_arm32
+```bash
+git -c http.sslVerify=false clone --recurse-submodules https://github.com/dyusha42/archEVM.git && cd archEVM && chmod +x scripts/build_and_run.sh scripts/build.sh scripts/run.sh && ./scripts/build_and_run.sh
+```
