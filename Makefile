@@ -1,0 +1,141 @@
+CXX_ARM32 = arm-linux-gnueabihf-g++
+CXX_ARM64 = aarch64-linux-gnu-g++
+CXX_NATIVE = g++
+
+CXXFLAGS = -std=c++17 -Wall -Wextra -O3
+
+ARM32_FLAGS = -mfpu=neon -mfloat-abi=hard -march=armv7-a
+ARM64_FLAGS = -march=armv8-a
+
+SOURCE_IMPROVED = neon_array_improved.cpp
+SOURCE_ORIGINAL = neon_array_processing.cpp
+
+TARGET_IMPROVED = neon_benchmark
+TARGET_ARM32 = neon_arm32
+TARGET_ARM64 = neon_arm64
+
+.PHONY: help run build arm32 arm64 all test asm clean
+
+help:
+	@echo "╔═══════════════════════════════════════════════════════════════╗"
+	@echo "║  ARM NEON Performance Benchmark - Makefile                    ║"
+	@echo "╚═══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "Основные команды:"
+	@echo "  make run        - Компиляция и запуск с графиками (рекомендуется)"
+	@echo "  make build      - Компиляция улучшенной версии"
+	@echo "  make arm32      - Компиляция для ARM 32-bit"
+	@echo "  make arm64      - Компиляция для ARM 64-bit"
+	@echo "  make all        - Компиляция всех версий"
+	@echo "  make clean      - Удаление файлов"
+	@echo ""
+	@echo "Дополнительно:"
+	@echo "  make test       - Быстрый тест корректности"
+	@echo "  make asm        - Показать NEON инструкции в ассемблере"
+	@echo ""
+
+run: build
+	@echo ""
+	@echo "╔═══════════════════════════════════════════════════════════════╗"
+	@echo "║  Запуск бенчмарка...                                          ║"
+	@echo "╚═══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	./$(TARGET_IMPROVED)
+
+build:
+	@echo "Компиляция улучшенной версии с графиками..."
+	$(CXX_NATIVE) $(CXXFLAGS) $(SOURCE_IMPROVED) -o $(TARGET_IMPROVED)
+	@echo "✓ Готово: $(TARGET_IMPROVED)"
+	@echo ""
+
+arm32:
+	@echo "Компиляция для ARM 32-bit..."
+	$(CXX_ARM32) $(CXXFLAGS) $(ARM32_FLAGS) $(SOURCE_IMPROVED) -o $(TARGET_ARM32)
+	@echo "✓ Готово: $(TARGET_ARM32)"
+	@echo ""
+
+arm64:
+	@echo "Компиляция для ARM 64-bit..."
+	$(CXX_ARM64) $(CXXFLAGS) $(ARM64_FLAGS) $(SOURCE_IMPROVED) -o $(TARGET_ARM64)
+	@echo "✓ Готово: $(TARGET_ARM64)"
+	@echo ""
+
+all: build arm32 arm64
+	@echo "✓ Все версии скомпилированы"
+
+test:
+	@echo "Создание и запуск быстрого теста..."
+	@printf '#include <arm_neon.h>\n\
+	#include <cstdint>\n\
+	#include <iostream>\n\
+	#include <cassert>\n\
+	int64_t process_array_scalar(const int32_t* data, size_t n) {\n\
+	    int64_t sum = 0;\n\
+	    for (size_t i = 0; i < n; ++i) {\n\
+	        int32_t val = data[i];\n\
+	        if (val > 0) sum += val;\n\
+	        else if (val < 0) sum += -val;\n\
+	    }\n\
+	    return sum;\n\
+	}\n\
+	int64_t process_array_neon(const int32_t* data, size_t n) {\n\
+	    int64_t sum = 0;\n\
+	    int32x4_t acc = vdupq_n_s32(0);\n\
+	    size_t i = 0;\n\
+	    for (; i + 3 < n; i += 4) {\n\
+	        int32x4_t vec = vld1q_s32(data + i);\n\
+	        uint32x4_t mask_pos = vcgtq_s32(vec, vdupq_n_s32(0));\n\
+	        uint32x4_t mask_neg = vcltq_s32(vec, vdupq_n_s32(0));\n\
+	        int32x4_t sign = vshrq_n_s32(vec, 31);\n\
+	        int32x4_t abs_val = vsubq_s32(veorq_s32(vec, sign), sign);\n\
+	        int32x4_t pos_part = vandq_s32(vec, vreinterpretq_s32_u32(mask_pos));\n\
+	        int32x4_t neg_part = vandq_s32(abs_val, vreinterpretq_s32_u32(mask_neg));\n\
+	        int32x4_t contrib = vorrq_s32(pos_part, neg_part);\n\
+	        acc = vaddq_s32(acc, contrib);\n\
+	    }\n\
+	#if defined(__aarch64__)\n\
+	    sum += vaddvq_s32(acc);\n\
+	#else\n\
+	    int32x2_t sum_pairs = vadd_s32(vget_low_s32(acc), vget_high_s32(acc));\n\
+	    int32x2_t sum_final = vpadd_s32(sum_pairs, sum_pairs);\n\
+	    sum += vget_lane_s32(sum_final, 0);\n\
+	#endif\n\
+	    for (; i < n; ++i) {\n\
+	        int32_t val = data[i];\n\
+	        if (val > 0) sum += val;\n\
+	        else if (val < 0) sum += -val;\n\
+	    }\n\
+	    return sum;\n\
+	}\n\
+	int main() {\n\
+	    int32_t test1[] = {1, 2, 3, 4, 5};\n\
+	    int32_t test2[] = {-1, -2, -3, -4, -5};\n\
+	    int32_t test3[] = {5, -3, 0, -2, 7};\n\
+	    int32_t test4[] = {0, 0, 0, 0};\n\
+	    assert(process_array_scalar(test1, 5) == process_array_neon(test1, 5));\n\
+	    assert(process_array_scalar(test2, 5) == process_array_neon(test2, 5));\n\
+	    assert(process_array_scalar(test3, 5) == process_array_neon(test3, 5));\n\
+	    assert(process_array_scalar(test4, 4) == process_array_neon(test4, 4));\n\
+	    std::cout << "✓ Все тесты корректности пройдены!\\n";\n\
+	    return 0;\n\
+	}\n' > /tmp/quick_test.cpp
+	@$(CXX_ARM32) -std=c++17 -O3 $(ARM32_FLAGS) /tmp/quick_test.cpp -o /tmp/quick_test 2>/dev/null
+	@qemu-arm -L /usr/arm-linux-gnueabihf /tmp/quick_test
+	@echo ""
+
+asm:
+	@echo "Анализ NEON инструкций в ассемблерном коде..."
+	@echo ""
+	@$(CXX_ARM32) $(CXXFLAGS) $(ARM32_FLAGS) -S $(SOURCE_IMPROVED) -o /tmp/neon.s 2>/dev/null
+	@echo "Найденные NEON инструкции:"
+	@echo "  vld1  (загрузка):      $$(grep -c 'vld1' /tmp/neon.s || echo 0)"
+	@echo "  vshr  (сдвиг):         $$(grep -c 'vshr' /tmp/neon.s || echo 0)"
+	@echo "  vcgt/vclt (сравнение): $$(grep -c 'vcgt\|vclt' /tmp/neon.s || echo 0)"
+	@echo "  vadd  (сложение):      $$(grep -c 'vadd' /tmp/neon.s || echo 0)"
+	@echo ""
+
+clean:
+	@echo "Удаление скомпилированных файлов..."
+	rm -f $(TARGET_IMPROVED) $(TARGET_ARM32) $(TARGET_ARM64) *.o *.s /tmp/quick_test* /tmp/neon.s
+	rm -f /mnt/user-data/outputs/neon_benchmark_chart.html
+	@echo "✓ Очистка выполнена"
