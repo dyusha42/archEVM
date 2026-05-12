@@ -274,7 +274,7 @@ void generate_html_chart(const std::vector<BenchmarkResult>& results) {
 <div class="page">
     <div class="header">
         <h1>ARM NEON — Performance Analysis</h1>
-        <p>Сравнение скалярной и NEON векторной обработки массивов · время в миллисекундах · логарифмический масштаб по N · от 1000 элементов</p>
+        <p>Сравнение скалярной и NEON векторной обработки массивов · время в миллисекундах · логарифмический масштаб по N</p>
     </div>
 
     <div class="chart-wrap">
@@ -287,10 +287,6 @@ void generate_html_chart(const std::vector<BenchmarkResult>& results) {
         <div class="stat-card">
             <div class="stat-label">Среднее ускорение NEON</div>
             <div class="stat-value" id="avgSpeedupNeon">—</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Среднее ускорение NEON Unrolled</div>
-            <div class="stat-value" id="avgSpeedupUnrolled">—</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Максимальное ускорение</div>
@@ -309,9 +305,7 @@ void generate_html_chart(const std::vector<BenchmarkResult>& results) {
                     <th>Размер массива</th>
                     <th>Скалярная (мс)</th>
                     <th>NEON (мс)</th>
-                    <th>NEON Unrolled (мс)</th>
                     <th>Ускорение NEON</th>
-                    <th>Ускорение Unrolled</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -361,11 +355,10 @@ void generate_html_chart(const std::vector<BenchmarkResult>& results) {
     const COLORS = [
         { line: 'rgba(245,101,101,1)',   glow: 'rgba(245,101,101,0.5)'  },
         { line: 'rgba(72,187,120,1)',    glow: 'rgba(72,187,120,0.5)'   },
-        { line: 'rgba(66,153,225,1)',    glow: 'rgba(66,153,225,0.5)'   },
     ];
 
-    const LABELS   = ['Скалярная', 'NEON', 'NEON Unrolled'];
-    const KEYS     = ['scalar', 'neon', 'unrolled'];
+    const LABELS   = ['Скалярная', 'NEON'];
+    const KEYS     = ['scalar', 'neon'];
 
     const xTicks = [1000, 10000, 100000, 1000000, 10000000];
 
@@ -464,14 +457,12 @@ void generate_html_chart(const std::vector<BenchmarkResult>& results) {
         }
     });
 
-    const speedupsNeon     = RAW.map(r => r.speedupNeon);
-    const speedupsUnrolled = RAW.map(r => r.speedupUnrolled);
+    const speedupsNeon = RAW.map(r => r.speedupNeon);
 
     const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
 
-    document.getElementById('avgSpeedupNeon').textContent     = avg(speedupsNeon).toFixed(2) + 'x';
-    document.getElementById('avgSpeedupUnrolled').textContent = avg(speedupsUnrolled).toFixed(2) + 'x';
-    document.getElementById('maxSpeedup').textContent         = Math.max(...speedupsNeon, ...speedupsUnrolled).toFixed(2) + 'x';
+    document.getElementById('avgSpeedupNeon').textContent = avg(speedupsNeon).toFixed(2) + 'x';
+    document.getElementById('maxSpeedup').textContent     = Math.max(...speedupsNeon).toFixed(2) + 'x';
     document.getElementById('totalTests').textContent         = RAW.length;
 
     const tbody = document.getElementById('tableBody');
@@ -483,9 +474,7 @@ void generate_html_chart(const std::vector<BenchmarkResult>& results) {
             `<td><strong>${r.size.toLocaleString('ru-RU')}</strong></td>` +
             `<td>${fmt(r.scalar)}</td>` +
             `<td>${fmt(r.neon)}</td>` +
-            `<td>${fmt(r.unrolled)}</td>` +
-            `<td class="${cls(r.speedupNeon)}">${r.speedupNeon.toFixed(2)}x</td>` +
-            `<td class="${cls(r.speedupUnrolled)}">${r.speedupUnrolled.toFixed(2)}x</td>`;
+            `<td class="${cls(r.speedupNeon)}">${r.speedupNeon.toFixed(2)}x</td>`;
         tbody.appendChild(row);
     });
 </script>

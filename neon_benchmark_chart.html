@@ -128,7 +128,7 @@
 <div class="page">
     <div class="header">
         <h1>ARM NEON — Performance Analysis</h1>
-        <p>Сравнение скалярной и NEON векторной обработки массивов · время в миллисекундах · логарифмический масштаб по N · от 1000 элементов</p>
+        <p>Сравнение скалярной и NEON векторной обработки массивов · время в миллисекундах · логарифмический масштаб по N</p>
     </div>
 
     <div class="chart-wrap">
@@ -141,10 +141,6 @@
         <div class="stat-card">
             <div class="stat-label">Среднее ускорение NEON</div>
             <div class="stat-value" id="avgSpeedupNeon">—</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Среднее ускорение NEON Unrolled</div>
-            <div class="stat-value" id="avgSpeedupUnrolled">—</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Максимальное ускорение</div>
@@ -163,52 +159,50 @@
                     <th>Размер массива</th>
                     <th>Скалярная (мс)</th>
                     <th>NEON (мс)</th>
-                    <th>NEON Unrolled (мс)</th>
                     <th>Ускорение NEON</th>
-                    <th>Ускорение Unrolled</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
     </div>
 
-    <div class="footer">Сгенерировано: 2026-05-10 22:27:38 · ARM NEON Benchmark</div>
+    <div class="footer">Сгенерировано: 2026-05-12 14:52:22 · ARM NEON Benchmark</div>
 </div>
 
 <script>
     const RAW = [
-        {size:4,scalar:0.000001,neon:0.000001,unrolled:0.000001,speedupNeon:1.028405,speedupUnrolled:1.021708},
-        {size:8,scalar:0.000002,neon:0.000002,unrolled:0.000002,speedupNeon:1.001395,speedupUnrolled:1.014602},
-        {size:16,scalar:0.000005,neon:0.000005,unrolled:0.000005,speedupNeon:1.011977,speedupUnrolled:1.001293},
-        {size:32,scalar:0.000023,neon:0.000013,unrolled:0.000023,speedupNeon:1.826432,speedupUnrolled:1.003936},
-        {size:64,scalar:0.000042,neon:0.000030,unrolled:0.000044,speedupNeon:1.399683,speedupUnrolled:0.957848},
-        {size:128,scalar:0.000086,neon:0.000058,unrolled:0.000086,speedupNeon:1.484259,speedupUnrolled:1.000760},
-        {size:256,scalar:0.000171,neon:0.000115,unrolled:0.000174,speedupNeon:1.482257,speedupUnrolled:0.983383},
-        {size:512,scalar:0.000367,neon:0.000238,unrolled:0.000352,speedupNeon:1.539214,speedupUnrolled:1.042107},
-        {size:1000,scalar:0.000749,neon:0.000491,unrolled:0.000701,speedupNeon:1.525190,speedupUnrolled:1.068320},
-        {size:2000,scalar:0.001463,neon:0.001048,unrolled:0.001418,speedupNeon:1.396295,speedupUnrolled:1.031995},
-        {size:3000,scalar:0.002314,neon:0.001590,unrolled:0.002243,speedupNeon:1.454981,speedupUnrolled:1.031384},
-        {size:4000,scalar:0.003600,neon:0.002156,unrolled:0.003032,speedupNeon:1.669926,speedupUnrolled:1.187042},
-        {size:5000,scalar:0.003756,neon:0.002627,unrolled:0.003691,speedupNeon:1.429499,speedupUnrolled:1.017500},
-        {size:7500,scalar:0.012928,neon:0.005507,unrolled:0.010193,speedupNeon:2.347528,speedupUnrolled:1.268295},
-        {size:10000,scalar:0.022025,neon:0.018767,unrolled:0.022774,speedupNeon:1.173563,speedupUnrolled:0.967110},
-        {size:15000,scalar:0.039951,neon:0.039679,unrolled:0.052473,speedupNeon:1.006857,speedupUnrolled:0.761366},
-        {size:20000,scalar:0.057977,neon:0.059599,unrolled:0.060300,speedupNeon:0.972789,speedupUnrolled:0.961483},
-        {size:30000,scalar:0.093152,neon:0.084198,unrolled:0.091573,speedupNeon:1.106343,speedupUnrolled:1.017240},
-        {size:40000,scalar:0.128161,neon:0.113330,unrolled:0.125108,speedupNeon:1.130873,speedupUnrolled:1.024408},
-        {size:50000,scalar:0.155824,neon:0.147649,unrolled:0.161873,speedupNeon:1.055363,speedupUnrolled:0.962629},
-        {size:75000,scalar:0.235931,neon:0.226031,unrolled:0.243515,speedupNeon:1.043801,speedupUnrolled:0.968858},
-        {size:100000,scalar:0.316740,neon:0.321533,unrolled:0.322604,speedupNeon:0.985093,speedupUnrolled:0.981823},
-        {size:150000,scalar:0.490338,neon:0.467778,unrolled:0.493769,speedupNeon:1.048227,speedupUnrolled:0.993050},
-        {size:200000,scalar:0.670755,neon:0.649483,unrolled:0.651725,speedupNeon:1.032751,speedupUnrolled:1.029198},
-        {size:300000,scalar:1.039202,neon:0.958551,unrolled:0.978867,speedupNeon:1.084138,speedupUnrolled:1.061638},
-        {size:400000,scalar:1.282796,neon:1.239996,unrolled:1.350259,speedupNeon:1.034517,speedupUnrolled:0.950037},
-        {size:500000,scalar:1.693568,neon:1.551575,unrolled:1.679552,speedupNeon:1.091516,speedupUnrolled:1.008345},
-        {size:750000,scalar:2.493974,neon:2.411978,unrolled:2.466691,speedupNeon:1.033995,speedupUnrolled:1.011061},
-        {size:1000000,scalar:3.355453,neon:3.125860,unrolled:3.467591,speedupNeon:1.073449,speedupUnrolled:0.967661},
-        {size:1500000,scalar:5.024252,neon:4.812015,unrolled:5.117124,speedupNeon:1.044106,speedupUnrolled:0.981851},
-        {size:2000000,scalar:6.861873,neon:6.499069,unrolled:6.730168,speedupNeon:1.055824,speedupUnrolled:1.019569},
-        {size:10000000,scalar:34.484646,neon:32.849131,unrolled:33.909448,speedupNeon:1.049789,speedupUnrolled:1.016963}
+        {size:4,scalar:0.000016,neon:0.000011,unrolled:0.000015,speedupNeon:1.463518,speedupUnrolled:1.112660},
+        {size:8,scalar:0.000020,neon:0.000012,unrolled:0.000020,speedupNeon:1.675738,speedupUnrolled:1.028236},
+        {size:16,scalar:0.000046,neon:0.000026,unrolled:0.000042,speedupNeon:1.792480,speedupUnrolled:1.097962},
+        {size:32,scalar:0.000097,neon:0.000055,unrolled:0.000071,speedupNeon:1.781027,speedupUnrolled:1.370965},
+        {size:64,scalar:0.000153,neon:0.000107,unrolled:0.000152,speedupNeon:1.434869,speedupUnrolled:1.009348},
+        {size:128,scalar:0.000264,neon:0.000216,unrolled:0.000244,speedupNeon:1.220139,speedupUnrolled:1.079857},
+        {size:256,scalar:0.000533,neon:0.000403,unrolled:0.000521,speedupNeon:1.321752,speedupUnrolled:1.023968},
+        {size:512,scalar:0.001003,neon:0.000798,unrolled:0.001028,speedupNeon:1.256191,speedupUnrolled:0.975721},
+        {size:1000,scalar:0.001796,neon:0.001539,unrolled:0.001949,speedupNeon:1.167265,speedupUnrolled:0.921500},
+        {size:2000,scalar:0.003928,neon:0.003184,unrolled:0.005032,speedupNeon:1.233827,speedupUnrolled:0.780668},
+        {size:3000,scalar:0.006557,neon:0.004588,unrolled:0.006446,speedupNeon:1.429146,speedupUnrolled:1.017237},
+        {size:4000,scalar:0.008730,neon:0.007603,unrolled:0.008074,speedupNeon:1.148224,speedupUnrolled:1.081304},
+        {size:5000,scalar:0.009795,neon:0.006608,unrolled:0.010898,speedupNeon:1.482284,speedupUnrolled:0.898804},
+        {size:7500,scalar:0.017282,neon:0.013451,unrolled:0.040170,speedupNeon:1.284820,speedupUnrolled:0.430230},
+        {size:10000,scalar:0.056595,neon:0.050505,unrolled:0.063849,speedupNeon:1.120591,speedupUnrolled:0.886394},
+        {size:15000,scalar:0.096629,neon:0.100904,unrolled:0.104915,speedupNeon:0.957637,speedupUnrolled:0.921023},
+        {size:20000,scalar:0.143682,neon:0.142386,unrolled:0.153243,speedupNeon:1.009102,speedupUnrolled:0.937606},
+        {size:30000,scalar:0.224176,neon:0.224468,unrolled:0.289000,speedupNeon:0.998699,speedupUnrolled:0.775695},
+        {size:40000,scalar:0.467159,neon:0.355977,unrolled:0.425960,speedupNeon:1.312327,speedupUnrolled:1.096720},
+        {size:50000,scalar:0.456797,neon:0.360545,unrolled:0.377457,speedupNeon:1.266961,speedupUnrolled:1.210196},
+        {size:75000,scalar:0.602465,neon:0.536411,unrolled:0.584721,speedupNeon:1.123140,speedupUnrolled:1.030345},
+        {size:100000,scalar:0.898838,neon:0.740618,unrolled:0.844434,speedupNeon:1.213633,speedupUnrolled:1.064427},
+        {size:150000,scalar:1.247344,neon:1.030140,unrolled:1.263804,speedupNeon:1.210849,speedupUnrolled:0.986975},
+        {size:200000,scalar:1.618310,neon:1.467045,unrolled:1.571703,speedupNeon:1.103109,speedupUnrolled:1.029654},
+        {size:300000,scalar:3.162401,neon:2.123423,unrolled:2.417416,speedupNeon:1.489294,speedupUnrolled:1.308174},
+        {size:400000,scalar:3.304909,neon:2.955480,unrolled:3.791175,speedupNeon:1.118231,speedupUnrolled:0.871737},
+        {size:500000,scalar:3.868251,neon:3.432685,unrolled:3.578804,speedupNeon:1.126888,speedupUnrolled:1.080878},
+        {size:750000,scalar:5.551026,neon:5.259514,unrolled:5.429092,speedupNeon:1.055426,speedupUnrolled:1.022459},
+        {size:1000000,scalar:7.353029,neon:6.707282,unrolled:7.297627,speedupNeon:1.096275,speedupUnrolled:1.007592},
+        {size:1500000,scalar:10.963293,neon:9.920727,unrolled:11.499638,speedupNeon:1.105090,speedupUnrolled:0.953360},
+        {size:2000000,scalar:15.347946,neon:13.754621,unrolled:14.870234,speedupNeon:1.115839,speedupUnrolled:1.032125},
+        {size:10000000,scalar:86.861579,neon:98.506223,unrolled:100.942134,speedupNeon:0.881788,speedupUnrolled:0.860509}
     ];
 
     const glowPlugin = {
@@ -227,11 +221,10 @@
     const COLORS = [
         { line: 'rgba(245,101,101,1)',   glow: 'rgba(245,101,101,0.5)'  },
         { line: 'rgba(72,187,120,1)',    glow: 'rgba(72,187,120,0.5)'   },
-        { line: 'rgba(66,153,225,1)',    glow: 'rgba(66,153,225,0.5)'   },
     ];
 
-    const LABELS   = ['Скалярная', 'NEON', 'NEON Unrolled'];
-    const KEYS     = ['scalar', 'neon', 'unrolled'];
+    const LABELS   = ['Скалярная', 'NEON'];
+    const KEYS     = ['scalar', 'neon'];
 
     const xTicks = [1000, 10000, 100000, 1000000, 10000000];
 
@@ -330,14 +323,12 @@
         }
     });
 
-    const speedupsNeon     = RAW.map(r => r.speedupNeon);
-    const speedupsUnrolled = RAW.map(r => r.speedupUnrolled);
+    const speedupsNeon = RAW.map(r => r.speedupNeon);
 
     const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
 
-    document.getElementById('avgSpeedupNeon').textContent     = avg(speedupsNeon).toFixed(2) + 'x';
-    document.getElementById('avgSpeedupUnrolled').textContent = avg(speedupsUnrolled).toFixed(2) + 'x';
-    document.getElementById('maxSpeedup').textContent         = Math.max(...speedupsNeon, ...speedupsUnrolled).toFixed(2) + 'x';
+    document.getElementById('avgSpeedupNeon').textContent = avg(speedupsNeon).toFixed(2) + 'x';
+    document.getElementById('maxSpeedup').textContent     = Math.max(...speedupsNeon).toFixed(2) + 'x';
     document.getElementById('totalTests').textContent         = RAW.length;
 
     const tbody = document.getElementById('tableBody');
@@ -349,9 +340,7 @@
             `<td><strong>${r.size.toLocaleString('ru-RU')}</strong></td>` +
             `<td>${fmt(r.scalar)}</td>` +
             `<td>${fmt(r.neon)}</td>` +
-            `<td>${fmt(r.unrolled)}</td>` +
-            `<td class="${cls(r.speedupNeon)}">${r.speedupNeon.toFixed(2)}x</td>` +
-            `<td class="${cls(r.speedupUnrolled)}">${r.speedupUnrolled.toFixed(2)}x</td>`;
+            `<td class="${cls(r.speedupNeon)}">${r.speedupNeon.toFixed(2)}x</td>`;
         tbody.appendChild(row);
     });
 </script>
